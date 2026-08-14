@@ -1,0 +1,587 @@
+﻿=== image.jsx ===
+// EXTENSION â€” a .webp output re-encodes JPG/PNG uploads to WebP on the fly).
+const WIX_MEDIA_HOSTS = ["media.base44.com", "static.wixstatic.com"]
+// First-paint width before the container is measured.
+---
+/**
+ * Image with built-in Wix Media Platform support: URLs on media.base44.com /
+ * static.wixstatic.com are served resized to the rendered container (per
+---
+=== AvaliacaoModal.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+      try {
+        const existentes = await base44.entities.Avaliacao.filter({
+          pedido: pedido.id,
+---
+    try {
+      await base44.entities.Avaliacao.create({
+        pedido: pedido.id,
+---
+      if (avaliadoTipo === 'prestador' && avaliadoId) {
+        const prestadores = await base44.entities.Prestador.filter({ usuario: avaliadoId });
+        if (prestadores.length > 0) {
+---
+          const prest = prestadores[0];
+          const todas = await base44.entities.Avaliacao.filter({ avaliado: avaliadoId });
+          const media = todas.reduce((s, a) => s + (a.nota || 0), 0) / (todas.length || 1);
+---
+          const media = todas.reduce((s, a) => s + (a.nota || 0), 0) / (todas.length || 1);
+          await base44.entities.Prestador.update(prest.id, {
+            avaliacao_media: Math.round(media * 100) / 100
+---
+=== CardMatchingPrestador.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+      try {
+        setUser(await base44.entities.Usuario.get(prestador.usuario));
+      } catch {}
+---
+=== CardMissaoEmCurso.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+  useEffect(() => {
+    const unsub = base44.entities.Pedido.subscribe((event) => {
+      if (event.data && event.data.id === pedido.id) setAtual(event.data);
+---
+    setPronto(true);
+    const updated = await base44.entities.Pedido.update(pedido.id, { [meuCampo]: true });
+    if (updated && updated[outroCampo]) {
+---
+    if (updated && updated[outroCampo]) {
+      await base44.entities.Pedido.update(pedido.id, { status: 'concluido', concluido_em: new Date().toISOString() });
+    }
+---
+  const abortar = async () => {
+    await base44.entities.Pedido.update(pedido.id, { status: 'cancelado' });
+    setConfirmaAbort(false);
+---
+=== ClienteHome.jsx ===
+import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Textarea } from '@/components/ui/textarea';
+---
+    if (!p?.prestador || contraparte?.id === p.prestador) return;
+    try { setContraparte(await base44.entities.Usuario.get(p.prestador)); } catch {}
+  };
+---
+      try {
+        const emExec = await base44.entities.Pedido.filter({ cliente: usuario.id, status: 'em_execucao' }, '-updated_date', 1);
+        if (emExec.length) { const p = emExec[0]; setPedido(p); await carregarContraparte(p); setStage('missao'); return; }
+---
+        if (emExec.length) { const p = emExec[0]; setPedido(p); await carregarContraparte(p); setStage('missao'); return; }
+        const aceitos = await base44.entities.Pedido.filter({ cliente: usuario.id, status: 'aceito' }, '-updated_date', 1);
+        if (aceitos.length) { const p = aceitos[0]; setPedido(p); await carregarContraparte(p); setStage('negociacao'); return; }
+---
+        if (aceitos.length) { const p = aceitos[0]; setPedido(p); await carregarContraparte(p); setStage('negociacao'); return; }
+        const buscando = await base44.entities.Pedido.filter({ cliente: usuario.id, status: 'buscando' }, '-updated_date', 1);
+        if (buscando.length) { setPedido(buscando[0]); setStage('espera'); return; }
+---
+        if (buscando.length) { setPedido(buscando[0]); setStage('espera'); return; }
+        const concluidos = await base44.entities.Pedido.filter({ cliente: usuario.id, status: 'concluido' }, '-concluido_em', 10);
+        for (const p of concluidos) {
+---
+        for (const p of concluidos) {
+          const avs = await base44.entities.Avaliacao.filter({ pedido: p.id, avaliador: usuario.id });
+          if (avs.length === 0) { setAvaliarPedido(p); break; }
+---
+    if (!pedido) return;
+    const unsub = base44.entities.Pedido.subscribe((event) => {
+      if (event.data && event.data.id === pedido.id) aplicarStatus(event.data);
+---
+    const interval = setInterval(async () => {
+      try { const p = await base44.entities.Pedido.get(pedido.id); if (p) aplicarStatus(p); } catch {}
+    }, 4000);
+---
+    try {
+      const todos = await base44.entities.Prestador.filter({ status_ativo: true, disponibilidade: 'livre' });
+      let cands = todos.filter((p) => p.usuario !== usuario.id);
+---
+        const tentados = [...(pedido.prestadores_tentados || []), pedido.prestador].filter(Boolean);
+        p = await base44.entities.Pedido.update(pedido.id, { prestador: candidate.usuario, status: 'buscando', prestadores_tentados: tentados });
+      } else {
+---
+      } else {
+        p = await base44.entities.Pedido.create({
+          cliente: usuario.id, categoria: catFinal, descricao: descricao.trim(),
+---
+  const cancelarEspera = async () => {
+    if (pedido) { try { await base44.entities.Pedido.update(pedido.id, { status: 'cancelado' }); } catch {} }
+    reset();
+---
+=== HeaderGlobal.jsx ===
+import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Wrench, Bell } from 'lucide-react';
+---
+    const campo = usuario.tipo === 'prestador' ? 'prestador' : 'cliente';
+    base44.entities.Pedido
+      .filter({ [campo]: usuario.id, status: 'aceito' })
+---
+=== Layout.jsx ===
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
+---
+    try {
+      const us = await base44.entities.Usuario.filter({ created_by_id: user.id });
+      const u = us[0] || null;
+---
+      if (u && u.tipo === 'prestador') {
+        const ps = await base44.entities.Prestador.filter({ usuario: u.id });
+        setPrestador(ps[0] || null);
+---
+=== LiveStakeWidget.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const msgs = await base44.entities.Mensagem.filter({ conversa: pedido.id, tipo: 'proposta' }, '-created_date', 30);
+      setHistorico(msgs.reverse());
+---
+    carregar();
+    const unsub = base44.entities.Mensagem.subscribe((event) => {
+      const m = event.data;
+---
+    try {
+      await base44.entities.Mensagem.create({
+        conversa: pedido.id, remetente: usuarioId, destinatario: contraparteId,
+---
+      });
+      await base44.entities.Pedido.update(pedido.id, { preco_proposto: valor, proposta_de: usuarioId, proposta_aceita: false });
+    } finally { setEnviando(false); }
+---
+    try {
+      await base44.entities.Pedido.update(pedido.id, {
+        preco_negociado: valorContraparte, proposta_aceita: true, status: 'em_execucao'
+---
+=== Onboarding.jsx ===
+import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const criado = await base44.entities.Usuario.create({
+        nome: nome.trim(),
+---
+      if (tipo === 'prestador') {
+        await base44.entities.Prestador.create({
+          usuario: criado.id,
+---
+=== PerguntasRapidas.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const msgs = await base44.entities.Mensagem.filter({ conversa: pedido.id, tipo: 'pergunta' }, '-created_date', 50);
+      setPerguntas(msgs);
+---
+    carregar();
+    const unsub = base44.entities.Mensagem.subscribe((event) => {
+      const m = event.data;
+---
+    for (const p of selecionadas) {
+      await base44.entities.Mensagem.create({
+        conversa: pedido.id, remetente: usuarioId, destinatario: contraparteId,
+---
+  const responder = async (pergunta, resp) => {
+    await base44.entities.Mensagem.update(pergunta.id, { resposta: resp });
+  };
+---
+=== PopupNegociacao.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Phone, HelpCircle, X, Check } from 'lucide-react';
+---
+  useEffect(() => {
+    const unsub = base44.entities.Pedido.subscribe((event) => {
+      if (event.data && event.data.id === pedido.id) setAtual(event.data);
+---
+    try {
+      const msgs = await base44.entities.Mensagem.filter({ conversa: pedido.id, tipo: 'pergunta' }, '-created_date', 50);
+      setPendentes(msgs.filter((m) => m.destinatario === usuario.id && !m.resposta));
+---
+    carregarPendentes();
+    const unsub = base44.entities.Mensagem.subscribe((event) => {
+      const m = event.data;
+---
+  const avancarExecucao = async () => {
+    await base44.entities.Pedido.update(pedido.id, { status: 'em_execucao', proposta_aceita: true });
+    onAvancou?.(atual);
+---
+  const responder = async (pergunta, resp) => {
+    try { await base44.entities.Mensagem.update(pergunta.id, { resposta: resp }); carregarPendentes(); } catch {}
+  };
+---
+=== PrestadorHome.jsx ===
+import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const emExec = await base44.entities.Pedido.filter({ prestador: usuario.id, status: 'em_execucao' }, '-updated_date', 1);
+      if (emExec.length) { const p = emExec[0]; setPedidoAtual(p); await carregarContraparte(p); return; }
+---
+      if (emExec.length) { const p = emExec[0]; setPedidoAtual(p); await carregarContraparte(p); return; }
+      const aceitos = await base44.entities.Pedido.filter({ prestador: usuario.id, status: 'aceito' }, '-updated_date', 1);
+      if (aceitos.length) { const p = aceitos[0]; setPedidoAtual(p); await carregarContraparte(p); return; }
+---
+      if (aceitos.length) { const p = aceitos[0]; setPedidoAtual(p); await carregarContraparte(p); return; }
+      const buscando = await base44.entities.Pedido.filter({ prestador: usuario.id, status: 'buscando' }, '-updated_date', 1);
+      if (buscando.length) setIncoming(buscando[0]);
+---
+    if (!p?.cliente || contraparte?.id === p.cliente) return;
+    try { setContraparte(await base44.entities.Usuario.get(p.cliente)); } catch {}
+  };
+---
+    if (!prestador) return;
+    const unsub = base44.entities.Pedido.subscribe((event) => {
+      const p = event.data;
+---
+        try {
+          const pend = await base44.entities.Pedido.filter({ prestador: usuario.id, status: 'buscando' }, '-updated_date', 1);
+          if (pend.length) setIncoming(pend[0]);
+---
+      if (novaLoc) { lat = novaLoc.lat; lng = novaLoc.lng; }
+      await base44.entities.Prestador.update(prestador.id, { status_ativo: !ativo, disponibilidade: 'livre', latitude: lat, longitude: lng });
+      setAtivo(!ativo);
+---
+    try {
+      await base44.entities.Pedido.update(incoming.id, { status: 'aceito', aceito_em: new Date().toISOString() });
+      await base44.entities.Prestador.update(prestador.id, { disponibilidade: 'ocupado' });
+---
+      await base44.entities.Pedido.update(incoming.id, { status: 'aceito', aceito_em: new Date().toISOString() });
+      await base44.entities.Prestador.update(prestador.id, { disponibilidade: 'ocupado' });
+      setPedidoAtual({ ...incoming, status: 'aceito' });
+---
+    try {
+      await base44.entities.Pedido.update(incoming.id, { status: 'recusado' });
+      setIncoming(null);
+---
+    try {
+      await base44.entities.Prestador.update(prestador.id, { disponibilidade: 'livre', total_servicos: (prestador.total_servicos || 0) + 1 });
+    } catch {}
+---
+    (async () => {
+      try { if (pedido.cliente) setCliente(await base44.entities.Usuario.get(pedido.cliente)); } catch {}
+    })();
+---
+=== app-params.jsx ===
+	}
+	const storageKey = `base44_${toSnakeCase(paramName)}`;
+	const urlParams = new URLSearchParams(window.location.search);
+---
+	if (getAppParamValue("clear_access_token") === 'true') {
+		storage.removeItem('base44_access_token');
+		storage.removeItem('token');
+---
+	return {
+		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
+		token: getAppParamValue("access_token", { removeFromUrl: true }),
+---
+		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
+		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
+		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
+---
+		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
+		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
+	}
+---
+=== AuthContest.jsx ===
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
+---
+import { appParams } from '@/lib/app-params';
+import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
+
+---
+      setIsLoadingAuth(true);
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+---
+      // Use the SDK's logout method which handles token cleanup and redirect
+      base44.auth.logout(window.location.href);
+    } else {
+---
+      // Just remove the token without redirect
+      base44.auth.logout();
+    }
+---
+    // Use the SDK's redirectToLogin method
+    base44.auth.redirectToLogin(window.location.href);
+  };
+---
+=== PageNotFound.jsx ===
+import { useLocation } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+---
+            try {
+                const user = await base44.auth.me();
+                return { user, isAuthenticated: true };
+---
+=== BuscarPrestador.jsx ===
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+      setCoords(loc);
+      const lista = await base44.entities.Prestador.filter({ status_ativo: true });
+      const comDist = lista.map((p) => ({
+---
+    try {
+      const novo = await base44.entities.Pedido.create({
+        cliente: usuario.id,
+---
+=== Chat.jsx ===
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { MessageCircle, ChevronRight } from 'lucide-react';
+---
+      try {
+        const pedidos = await base44.entities.Pedido.filter({ cliente: usuario.id }, '-updated_date', 30);
+        const comPrest = pedidos.filter((p) => p.prestador);
+---
+          try {
+            prestMap[pid] = await base44.entities.Usuario.get(pid);
+          } catch {}
+---
+          try {
+            const msgs = await base44.entities.Mensagem.filter({ conversa: p.id }, '-created_date', 20);
+            ultima = msgs.find((m) => !m.tipo || m.tipo === 'texto') || null;
+---
+=== DetalhesPedido.jsx ===
+import { useParams, useOutletContext, useNavigate, Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const p = await base44.entities.Pedido.get(id);
+      setPedido(p);
+---
+      if (p?.cliente) {
+        try { setCliente(await base44.entities.Usuario.get(p.cliente)); } catch {}
+      }
+---
+      if (p?.prestador) {
+        try { setPrestadorUser(await base44.entities.Usuario.get(p.prestador)); } catch {}
+      }
+---
+      if (p) {
+        const avs = await base44.entities.Avaliacao.filter({ pedido: p.id, avaliador: usuario.id });
+        setJaAvaliou(avs.length > 0);
+---
+    load();
+    const unsub = base44.entities.Pedido.subscribe((event) => {
+      if (event.data && event.data.id === id) setPedido(event.data);
+---
+=== ForgotPassword.jsx ===
+import { Link } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+---
+    try {
+      await base44.auth.resetPasswordRequest(email);
+    } catch {
+---
+=== GerenciarDisponibilidade.jsx ===
+import { useOutletContext } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      await base44.entities.Prestador.update(prestador.id, {
+        status_ativo: ativo,
+---
+=== HistoricoGanhos.jsx ===
+import { useOutletContext } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Wallet, TrendingUp, Calendar, ArrowDownToLine } from 'lucide-react';
+---
+    (async () => {
+      const concluidos = await base44.entities.Pedido.filter(
+        { prestador: usuario.id, status: 'concluido' },
+---
+=== Login.jsx ===
+import { Link } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+---
+    try {
+      await base44.auth.loginViaEmailPassword(email, password);
+      window.location.href = returnTo;
+---
+  const handleGoogle = () => {
+    base44.auth.loginWithProvider("google", returnTo);
+  };
+---
+=== MeusPedidos.jsx ===
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { ClipboardList, MapPin, Clock } from 'lucide-react';
+---
+    (async () => {
+      const lista = await base44.entities.Pedido.filter({ [campo]: usuario.id }, '-created_date', 50);
+      setPedidos(lista);
+---
+=== Notificacoes.jsx ===
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Bell, ClipboardList, CheckCircle2, Clock, XCircle, Hand, ChevronRight } from 'lucide-react';
+---
+    (async () => {
+      const pedidos = await base44.entities.Pedido.filter({ [campo]: usuario.id }, '-updated_date', 50);
+      setDados(gerarEntradas(pedidos));
+---
+=== NovaAvaliacao.jsx ===
+import { useParams, useOutletContext, useNavigate, Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+      try {
+        const p = await base44.entities.Pedido.get(pedidoId);
+        setPedido(p);
+---
+        if (alvoId) {
+          try { setAvaliado(await base44.entities.Usuario.get(alvoId)); } catch {}
+        }
+---
+      const alvoId = pedido.cliente === usuario.id ? pedido.prestador : pedido.cliente;
+      await base44.entities.Avaliacao.create({
+        pedido: pedido.id,
+---
+      if (pedido.cliente === usuario.id && alvoId) {
+        const prestadores = await base44.entities.Prestador.filter({ usuario: alvoId });
+        if (prestadores.length > 0) {
+---
+        if (prestadores.length > 0) {
+          const todas = await base44.entities.Avaliacao.filter({ avaliado: alvoId });
+          const media = todas.reduce((s, a) => s + (a.nota || 0), 0) / (todas.length || 1);
+---
+          const media = todas.reduce((s, a) => s + (a.nota || 0), 0) / (todas.length || 1);
+          await base44.entities.Prestador.update(prestadores[0].id, { avaliacao_media: Math.round(media * 100) / 100 });
+        }
+---
+=== OAuthConsent.jsx ===
+// App-side OAuth consent page for the app's MCP server. The platform redirects
+// AI clients here (see base44/mcp/config.json `consent_path`) with an opaque
+// `ctx` handle â€” the authorization request itself lives on the server. This page
+---
+        const data = await res.json();
+        // Gate on the server's auth result, NOT base44.auth.isAuthenticated():
+        // the SDK check runs the bearer path, so a cookie-only session (platform
+---
+=== PainelPrestador.jsx ===
+import { useOutletContext } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Star, Wrench, TrendingUp, Wallet, MessageSquare, Power, Bell } from 'lucide-react';
+---
+      try {
+        const concluidos = await base44.entities.Pedido.filter({
+          prestador: usuario.id,
+---
+
+        const avs = await base44.entities.Avaliacao.filter({ avaliado: usuario.id }, '-created_date', 10);
+        setAvaliacoes(avs);
+---
+=== Perfil.jsx ===
+import { useOutletContext, Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+---
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFoto(file_url);
+---
+    try {
+      await base44.entities.Usuario.update(usuario.id, {
+        nome: form.nome.trim(),
+---
+    try {
+      await base44.auth.logout();
+    } catch {}
+---
+      if (usuario.tipo === 'prestador') {
+        const ps = await base44.entities.Prestador.filter({ usuario: usuario.id });
+        for (const p of ps) {
+---
+        for (const p of ps) {
+          try { await base44.entities.Prestador.delete(p.id); } catch {}
+        }
+---
+      }
+      try { await base44.entities.Usuario.delete(usuario.id); } catch {}
+    } catch {}
+---
+    } catch {}
+    try { await base44.auth.logout(); } catch {}
+    window.location.href = '/register';
+---
+=== Register.jsx ===
+import { Link } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+---
+    try {
+      await base44.auth.register({ email, password });
+      setShowOtp(true);
+---
+    try {
+      const result = await base44.auth.verifyOtp({ email, otpCode });
+      if (result?.access_token) {
+---
+      if (result?.access_token) {
+        base44.auth.setToken(result.access_token);
+      }
+---
+    try {
+      await base44.auth.resendOtp(email);
+      toast({
+---
+  const handleGoogle = () => {
+    base44.auth.loginWithProvider("google", safeReturnTo());
+  };
+---
+=== ResetPassword.jsx ===
+import { Link, useSearchParams } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+---
+    try {
+      await base44.auth.resetPassword({ resetToken, newPassword });
+      window.location.href = "/login";
+---
+=== TelaConversa.jsx ===
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { ArrowLeft, Send, Paperclip, Check, CheckCheck } from 'lucide-react';
+---
+      try {
+        const p = await base44.entities.Pedido.get(pedidoId);
+        setPedido(p);
+---
+        if (outroId) {
+          const u = await base44.entities.Usuario.get(outroId);
+          setOutro(u);
+---
+        }
+        const msgs = await base44.entities.Mensagem.filter({ conversa: pedidoId }, 'created_date');
+        setMensagens(msgs.filter((m) => !m.tipo || m.tipo === 'texto'));
+---
+  useEffect(() => {
+    const unsub = base44.entities.Mensagem.subscribe((event) => {
+      if (event.data && event.data.conversa === pedidoId) {
+---
+      const outroId = pedido.cliente === usuario.id ? pedido.prestador : pedido.cliente;
+      await base44.entities.Mensagem.create({
+        conversa: pedidoId,
+---
