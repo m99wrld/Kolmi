@@ -1,0 +1,28 @@
+{
+  "name": "Avaliacao",
+  "type": "object",
+  "properties": {
+    "pedido": {
+      "type": "string"
+    },
+    "avaliador": {
+      "type": "string"
+    },
+    "avaliado": {
+      "type": "string"
+    },
+    "nota": {
+      "type": "number"
+    },
+    "comentario": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "pedido",
+    "avaliador",
+    "avaliado",
+    "nota",
+    "comentario"
+  ]
+}

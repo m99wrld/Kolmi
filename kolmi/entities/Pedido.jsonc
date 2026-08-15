@@ -1,0 +1,77 @@
+{
+  "name": "Pedido",
+  "type": "object",
+  "properties": {
+    "cliente": {
+      "type": "string"
+    },
+    "prestador": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "buscando",
+        "aceito",
+        "a_caminho",
+        "em_execucao",
+        "concluido",
+        "cancelado",
+        "recusado"
+      ],
+      "default": "buscando"
+    },
+    "latitude_cliente": {
+      "type": "number"
+    },
+    "longitude_cliente": {
+      "type": "number"
+    },
+    "preco_negociado": {
+      "type": "number"
+    },
+    "preco_proposto": {
+      "type": "number"
+    },
+    "proposta_de": {
+      "type": "string"
+    },
+    "proposta_aceita": {
+      "type": "boolean",
+      "default": false
+    },
+    "cliente_pronto": {
+      "type": "boolean",
+      "default": false
+    },
+    "prestador_pronto": {
+      "type": "boolean",
+      "default": false
+    },
+    "prestadores_tentados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "aceito_em": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "concluido_em": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "categoria",
+    "descricao"
+  ]
+}

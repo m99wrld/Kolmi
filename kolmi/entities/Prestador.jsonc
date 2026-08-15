@@ -1,0 +1,75 @@
+{
+  "name": "Prestador",
+  "type": "object",
+  "properties": {
+    "usuario": {
+      "type": "string"
+    },
+    "nome": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string"
+    },
+    "profissoes_extra": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "preco_base": {
+      "type": "number",
+      "default": 0
+    },
+    "verificado": {
+      "type": "boolean",
+      "default": false
+    },
+    "disponibilidade": {
+      "type": "string",
+      "enum": [
+        "livre",
+        "ocupado",
+        "pendente"
+      ],
+      "default": "livre"
+    },
+    "status_ativo": {
+      "type": "boolean",
+      "default": false
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "avaliacao_media": {
+      "type": "number",
+      "default": 0
+    },
+    "total_servicos": {
+      "type": "number",
+      "default": 0
+    },
+    "horario_inicio": {
+      "type": "string"
+    },
+    "horario_fim": {
+      "type": "string"
+    },
+    "dias_semana": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "categoria"
+  ]
+}

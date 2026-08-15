@@ -1,0 +1,49 @@
+{
+  "name": "Mensagem",
+  "type": "object",
+  "properties": {
+    "conversa": {
+      "type": "string"
+    },
+    "remetente": {
+      "type": "string"
+    },
+    "destinatario": {
+      "type": "string"
+    },
+    "texto": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "texto",
+        "proposta",
+        "pergunta"
+      ],
+      "default": "texto"
+    },
+    "valor": {
+      "type": "number"
+    },
+    "pergunta_texto": {
+      "type": "string"
+    },
+    "resposta": {
+      "type": "string",
+      "enum": [
+        "sim",
+        "nao"
+      ]
+    },
+    "lida": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "conversa",
+    "remetente",
+    "destinatario"
+  ]
+}

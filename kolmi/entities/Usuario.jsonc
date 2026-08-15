@@ -1,0 +1,41 @@
+{
+  "name": "Usuario",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string"
+    },
+    "telefone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "morada": {
+      "type": "string"
+    },
+    "data_nascimento": {
+      "type": "string",
+      "format": "date"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "cliente",
+        "prestador"
+      ],
+      "default": "cliente"
+    },
+    "foto": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nome",
+    "tipo"
+  ]
+}
